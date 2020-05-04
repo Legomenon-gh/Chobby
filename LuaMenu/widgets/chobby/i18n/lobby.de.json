@@ -1,0 +1,31 @@
+{
+  "ok": "OK",
+  "cancel": "Abbrechen",
+  "to_front": "Nach Vorne",
+  "retry": "Wiederholen",
+  "reset": "Zurücksetzen",
+  "close": "Schliessen",
+  "continue": "Fortsetzen",
+  "yes": "Ja",
+  "no": "Nein",
+  "apply": "Anwenden",
+  "do_not_ask_again": "Nicht wieder fragen",
+  "yes_caps": "JA",
+  "no_caps": "NEIN",
+  "quit": "Verlassen",
+  "back": "Zurück",
+  "settings": {
+    "set_window_position": "Fenster positionieren",
+    "set_resolution": "Auflösung wählen",
+    "autoLogin": "Automatisch einloggen",
+    "login_with_steam": "Login per Steam",
+    "use_steam_browser": "Nutze den Steam-Browser",
+    "planetwars_notifications": "Planetwars Meldungen",
+    "ingame_notifications": "Meldungen im Spiel",
+    "non_friend_notifications": "Spielanfragen nur von der Freundesliste erlauben",
+    "notifyForAllChat": "Meldungen bei Namenserwähnung im öffentlichen Chat",
+    "only_featured_maps": "Nur empfohlene Karten",
+    "simplifiedSkirmishSetup": "Vereinfachter Skirmish",
+    "simple_ai_list": "Vereinfachte KI Liste"
+  }
+}

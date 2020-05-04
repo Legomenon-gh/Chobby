@@ -1,5 +1,5 @@
 return {
-	-- TODO: Should separate keys by files where it gets used
+	-- TODO: Delete file after migrating all the strings to en/de.json
 	en = {
 		-- general
 		ok = "OK",

@@ -36,6 +36,7 @@ local CHECK_WIDTH = 280
 local TEXT_OFFSET = 6
 
 local settingsWindowHandler
+local tabPanel
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -263,6 +264,7 @@ end
 
 local function GetValueEntryBox(parent, name, position, currentValue)
 	local Configuration = WG.Chobby.Configuration
+	local caption = WG.Translate(name:lower() .. "_setting")
 
 	local label = Label:New {
 		x = 15,
@@ -270,7 +272,7 @@ local function GetValueEntryBox(parent, name, position, currentValue)
 		y = position + 5,
 		align = "right",
 		height = 35,
-		caption = name .. ":",
+		caption = caption,
 		font = Configuration:GetFont(3),
 		parent = parent,
 	}
@@ -335,7 +337,7 @@ local function ShowWindowGeoConfig(name, modeNum, modeName, retreatPadding)
 		y = 15,
 		height = 35,
 		font = Configuration:GetFont(3),
-		caption = i18n("set_window_position"),
+		caption = WG.Translate("settings.set_window_position"),
 		parent = manualWindow,
 	}
 
@@ -383,7 +385,7 @@ local function ShowWindowGeoConfig(name, modeNum, modeName, retreatPadding)
 		SetLobbyFullscreenMode(modeNum, borders)
 
 		manualWindow:Dispose()
-		local confirmation = WG.Chobby.ConfirmationPopup(FinalApplyFunc, "Keep these settings?", nil, 315, 170, i18n("yes"), i18n("no"), FinalApplyFailureFunc, true, 5)
+		local confirmation = WG.Chobby.ConfirmationPopup(FinalApplyFunc, "Keep these settings?", nil, 315, 170, WG.Translate("yes"), WG.Translate("no"), FinalApplyFailureFunc, true, 5)
 	end
 
 	local function CancelFunc()
@@ -396,7 +398,7 @@ local function ShowWindowGeoConfig(name, modeNum, modeName, retreatPadding)
 		width = 135,
 		bottom = 1,
 		height = 70,
-		caption = i18n("apply"),
+		caption = WG.Translate("apply"),
 		font = Configuration:GetFont(3),
 		classname = "action_button",
 		OnClick = {
@@ -411,7 +413,7 @@ local function ShowWindowGeoConfig(name, modeNum, modeName, retreatPadding)
 		width = 135,
 		bottom = 1,
 		height = 70,
-		caption = i18n("cancel"),
+		caption = WG.Translate("cancel"),
 		font = Configuration:GetFont(3),
 		classname = "negative_button",
 		OnClick = {
@@ -447,7 +449,7 @@ local function ShowManualFullscreenEntryWindow(name)
 		y = 15,
 		height = 35,
 		font = Configuration:GetFont(3),
-		caption = i18n("set_resolution"),
+		caption = WG.Translate("settings.set_resolution"),
 		parent = manualWindow,
 	}
 
@@ -489,7 +491,7 @@ local function ShowManualFullscreenEntryWindow(name)
 		SetLobbyFullscreenMode(5, resolution)
 
 		manualWindow:Dispose()
-		local confirmation = WG.Chobby.ConfirmationPopup(FinalApplyFunc, "Keep these settings?", nil, 315, 170, i18n("yes"), i18n("no"), FinalApplyFailureFunc, true, 5)
+		local confirmation = WG.Chobby.ConfirmationPopup(FinalApplyFunc, "Keep these settings?", nil, 315, 170, WG.Translate("yes"), WG.Translate("no"), FinalApplyFailureFunc, true, 5)
 	end
 
 	local function CancelFunc()
@@ -502,7 +504,7 @@ local function ShowManualFullscreenEntryWindow(name)
 		width = 135,
 		bottom = 1,
 		height = 70,
-		caption = i18n("apply"),
+		caption = WG.Translate("apply"),
 		font = Configuration:GetFont(3),
 		classname = "action_button",
 		OnClick = {
@@ -517,7 +519,7 @@ local function ShowManualFullscreenEntryWindow(name)
 		width = 135,
 		bottom = 1,
 		height = 70,
-		caption = i18n("cancel"),
+		caption = WG.Translate("cancel"),
 		font = Configuration:GetFont(3),
 		classname = "negative_button",
 		OnClick = {
@@ -536,10 +538,10 @@ end
 --------------------------------------------------------------------------------
 -- Lobby Settings
 
-local function AddCheckboxSetting(offset, caption, key, default, clickFunc, tooltip)
+local function AddCheckboxSetting(offset, captionKey, configKey, default, clickFunc, tooltipKey)
 	local Configuration = WG.Chobby.Configuration
 
-	local checked = Configuration[key]
+	local checked = Configuration[configKey]
 	if checked == nil then
 		checked = default
 	end
@@ -551,12 +553,12 @@ local function AddCheckboxSetting(offset, caption, key, default, clickFunc, tool
 		height = 30,
 		boxalign = "right",
 		boxsize = 20,
-		caption = caption,
 		checked = checked,
-		tooltip = tooltip,
+		captionKey = captionKey,
+		tooltipKey = tooltipKey,
 		font = Configuration:GetFont(2),
 		OnChange = {function (obj, newState)
-			Configuration:SetConfigValue(key, newState)
+			Configuration:SetConfigValue(configKey, newState)
 			if clickFunc then
 				clickFunc(newState)
 			end
@@ -566,7 +568,7 @@ local function AddCheckboxSetting(offset, caption, key, default, clickFunc, tool
 	return control, offset + ITEM_OFFSET
 end
 
-local function AddNumberSetting(offset, caption, desc, key, default, minVal, maxVal, isPercent)
+local function AddNumberSetting(offset, captionKey, tooltipKey, key, default, minVal, maxVal, isPercent)
 	local Configuration = WG.Chobby.Configuration
 
 	local label = Label:New {
@@ -576,7 +578,7 @@ local function AddNumberSetting(offset, caption, desc, key, default, minVal, max
 		height = 30,
 		valign = "top",
 		align = "left",
-		caption = caption,
+		captionKey = captionKey,
 		font = Configuration:GetFont(2),
 		tooltip = desc,
 	}
@@ -629,9 +631,9 @@ local function GetLobbyTabControls()
 	local children = {}
 
 	local langNum = 1
-    local langCodes = {}
-    local langNames = {}
-    local selectedLang = 1
+	local langCodes = {}
+	local langNames = {}
+	local selectedLang = 1
 	for locale, langTable in pairs(Configuration.languages) do
 		Spring.Echo("Adding language: "..langNum)
 		Spring.Echo("Locale: "..locale)
@@ -653,7 +655,7 @@ local function GetLobbyTabControls()
 		valign = "top",
 		align = "left",
 		font = Configuration:GetFont(2),
-		caption = "Language",
+		captionKey = "settings.language",
 	}
 	children[#children + 1] = ComboBox:New {
 		x = COMBO_X,
@@ -670,7 +672,7 @@ local function GetLobbyTabControls()
 					return
 				end
 				Configuration:SetConfigValue("language", langCodes[obj.selected])
-				i18n.setLocale(langCodes[obj.selected])
+				WG.SetLanguage(langCodes[obj.selected])
 			end
 		},
 	}
@@ -684,7 +686,7 @@ local function GetLobbyTabControls()
 		valign = "top",
 		align = "left",
 		font = Configuration:GetFont(2),
-		caption = "Split Panel Mode",
+		captionKey = "settings.split_panel_mode"
 	}
 	children[#children + 1] = ComboBox:New {
 		x = COMBO_X,
@@ -692,6 +694,7 @@ local function GetLobbyTabControls()
 		width = COMBO_WIDTH,
 		height = 30,
 		items = {"Autodetect", "Always Two", "Always One"},
+		captionKeys = {"settings.split_panel_opts.autodetect", "settings.split_panel_opts.two", "settings.split_panel_opts.one"},
 		font = Configuration:GetFont(2),
 		itemFontSize = Configuration:GetFont(2).size,
 		selected = Configuration.panel_layout or 1,
@@ -706,7 +709,7 @@ local function GetLobbyTabControls()
 	}
 	offset = offset + ITEM_OFFSET
 
-	children[#children + 1], children[#children + 2], offset = AddNumberSetting(offset, "Lobby Interface Scale", "Increase or decrease interface size, for accessibility and 4k screens.",
+	children[#children + 1], children[#children + 2], offset = AddNumberSetting(offset, "settings.lobby_interface_scale", "settings.lobby_interface_scale_tooltip" ,
 		"uiScale", Configuration.uiScale, Configuration.minUiScale*100, Configuration.maxUiScale*100, true)
 
 	children[#children + 1] = Label:New {
@@ -717,7 +720,7 @@ local function GetLobbyTabControls()
 		valign = "top",
 		align = "left",
 		font = Configuration:GetFont(2),
-		caption = "Chat Font Size",
+		captionKey = "settings.chat_font_size",
 	}
 	children[#children + 1] = Trackbar:New {
 		x = COMBO_X,
@@ -747,7 +750,7 @@ local function GetLobbyTabControls()
 		valign = "top",
 		align = "left",
 		font = Configuration:GetFont(2),
-		caption = "Menu Music Volume",
+		captionKey = "settings.menu_music_volume",
 	}
 	children[#children + 1] = Trackbar:New {
 		x = COMBO_X,
@@ -777,7 +780,7 @@ local function GetLobbyTabControls()
 		valign = "top",
 		align = "left",
 		font = Configuration:GetFont(2),
-		caption = "Notification Volume",
+		captionKey = "settings.notification_volume",
 	}
 	children[#children + 1] = Trackbar:New {
 		x = COMBO_X,
@@ -807,7 +810,7 @@ local function GetLobbyTabControls()
 		valign = "top",
 		align = "left",
 		font = Configuration:GetFont(2),
-		caption = "Background Brightness",
+		captionKey = "settings.background_brightness"
 	}
 	children[#children + 1] = Trackbar:New {
 		x = COMBO_X,
@@ -837,7 +840,7 @@ local function GetLobbyTabControls()
 		valign = "top",
 		align = "left",
 		font = Configuration:GetFont(2),
-		caption = "Game Overlay Opacity",
+		captionKey = "settings.game_overlay_opacity",
 	}
 	children[#children + 1] = Trackbar:New {
 		x = COMBO_X,
@@ -867,8 +870,8 @@ local function GetLobbyTabControls()
 		valign = "top",
 		align = "left",
 		font = Configuration:GetFont(2),
-		caption = "Coop Connection Delay",
-		tooltip = "Hosts with poor internet may require their clients to add a delay in order to connect.",
+		captionKey = "settings.coop_connection_delay",
+		tooltipKey = "settings.coop_connection_delay_tooltip",
 	}
 	children[#children + 1] = Trackbar:New {
 		x = COMBO_X,
@@ -897,7 +900,7 @@ local function GetLobbyTabControls()
 		height = 30,
 		boxalign = "right",
 		boxsize = 20,
-		caption = i18n("autoLogin"),
+		captionKey = "settings.autoLogin",
 		checked = Configuration.autoLogin or false,
 		font = Configuration:GetFont(2),
 		OnChange = {function (obj, newState)
@@ -910,22 +913,22 @@ local function GetLobbyTabControls()
 	offset = offset + ITEM_OFFSET
 
 	if not Configuration.gameConfig.disableSteam then
-		children[#children + 1], offset = AddCheckboxSetting(offset, i18n("login_with_steam"), "wantAuthenticateWithSteam", true)
-		children[#children + 1], offset = AddCheckboxSetting(offset, i18n("use_steam_browser"), "useSteamBrowser", true)
+		children[#children + 1], offset = AddCheckboxSetting(offset, "settings.login_with_steam", "wantAuthenticateWithSteam", true)
+		children[#children + 1], offset = AddCheckboxSetting(offset, "settings.use_steam_browser", "useSteamBrowser", true)
 	end
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Multiplayer in new window", "multiplayerLaunchNewSpring", true)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "settings.multiplayer_in_new_window", "multiplayerLaunchNewSpring", true)
 	if not Configuration.gameConfig.disablePlanetwars then
-		children[#children + 1], offset = AddCheckboxSetting(offset, i18n("planetwars_notifications"), "planetwarsNotifications", false)
+		children[#children + 1], offset = AddCheckboxSetting(offset, "settings.planetwars_notifications", "planetwarsNotifications", false)
 	end
-	children[#children + 1], offset = AddCheckboxSetting(offset, i18n("ingame_notifcations"), "ingameNotifcations", true)
-	children[#children + 1], offset = AddCheckboxSetting(offset, i18n("non_friend_notifications"), "nonFriendNotifications", true)
-	children[#children + 1], offset = AddCheckboxSetting(offset, i18n("notifyForAllChat"), "notifyForAllChat", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, i18n("only_featured_maps"), "onlyShowFeaturedMaps", true)
-	children[#children + 1], offset = AddCheckboxSetting(offset, i18n("simplifiedSkirmishSetup"), "simplifiedSkirmishSetup", true)
-	children[#children + 1], offset = AddCheckboxSetting(offset, i18n("simple_ai_list"), "simpleAiList", true)
-	children[#children + 1], offset = AddCheckboxSetting(offset, i18n("animate_lobby"), "animate_lobby", true)
-	children[#children + 1], offset = AddCheckboxSetting(offset, i18n("drawFullSpeed"), "drawAtFullSpeed", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, i18n("keep_queues"), "rememberQueuesOnStart", false, nil, "Stay in matchmaker queues when a battle is launched.")
+	children[#children + 1], offset = AddCheckboxSetting(offset, "settings.ingame_notifications", "ingameNotifcations", true)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "settings.non_friend_notifications", "nonFriendNotifications", true)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "settings.notifyForAllChat", "notifyForAllChat", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "settings.only_featured_maps", "onlyShowFeaturedMaps", true)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "settings.simplifiedSkirmishSetup", "simplifiedSkirmishSetup", true)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "settings.simple_ai_list", "simpleAiList", true)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "settings.animate_lobby", "animate_lobby", true)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "settings.drawFullSpeed", "drawAtFullSpeed", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "settings.keep_queues", "rememberQueuesOnStart", false, nil, "settings.keep_queues_tooltip")
 
 	children[#children + 1] = Label:New {
 		x = 20,
@@ -935,15 +938,16 @@ local function GetLobbyTabControls()
 		valign = "top",
 		align = "left",
 		font = Configuration:GetFont(2),
-		caption = "Clear Channel History",
+		captionKey = "settings.clear_channel_history"
 	}
+	
 	children[#children + 1] = Button:New {
 		x = COMBO_X,
 		y = offset,
 		width = COMBO_WIDTH,
 		height = 30,
-		caption = "Apply",
-		tooltip = "Clears chat history displayed in the lobby, does not affect the chat history files saved to your computer.",
+		captionKey = "apply",
+		tooltipKey = "settings.clear_channel_button_tooltip", 
 		font = Configuration:GetFont(2),
 		OnClick = {
 			function (obj)
@@ -962,15 +966,15 @@ local function GetLobbyTabControls()
 		valign = "top",
 		align = "left",
 		font = Configuration:GetFont(2),
-		caption = "Delete Path Cache",
+		captionKey = "settings.delete_path_cache",
 	}
 	children[#children + 1] = Button:New {
 		x = COMBO_X,
 		y = offset,
 		width = COMBO_WIDTH,
 		height = 30,
-		caption = "Apply",
-		tooltip = "Deletes path cache. May solve desync.",
+		captionKey = "apply",
+		tooltipKey = "settings.delete_path_cache_tooltip",
 		font = Configuration:GetFont(2),
 		OnClick = {
 			function (obj)
@@ -994,6 +998,8 @@ local function GetLobbyTabControls()
 	freezeSettings = false
 
 	Configuration:AddListener("OnConfigurationChange", onConfigurationChange)
+
+	manageControlsStrings(children)
 
 	return children
 end
@@ -1027,22 +1033,22 @@ local function GetVoidTabControls()
 		end
 	end
 
-	children[#children + 1], offset = AddCheckboxSetting(offset, i18n("debugMode"), "debugMode", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Debug Auto Win", "debugAutoWin", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Enable Profiler", "enableProfiler", false, EnableProfilerFunc)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Show Planet Unlocks", "showPlanetUnlocks", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Show Planet Enemy Units", "showPlanetEnemyUnits", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Campaign Spawn Debug", "campaignSpawnDebug", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Edit Campaign", "editCampaign", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Debug server messages", "activeDebugConsole", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Show channel bots", "displayBots", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Show wrong engines", "displayBadEngines2", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Debug for MatchMaker", "showMatchMakerBattles", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Hide interface", "hideInterface", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Neuter Settings", "doNotSetAnySpringSettings", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Agressive Set Borderless", "agressivelySetBorderlessWindowed", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Use wrong engine", "useWrongEngine", false)
-	children[#children + 1], offset = AddCheckboxSetting(offset, "Show old AI versions", "showOldAiVersions", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.debugMode", "debugMode", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.debug_auto_win", "debugAutoWin", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.enable_profiler", "enableProfiler", false, EnableProfilerFunc)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.show_planet_unlocks", "showPlanetUnlocks", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.show_planet_enemy_units", "showPlanetEnemyUnits", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.campaign_spawn_debug", "campaignSpawnDebug", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.edit_campaign", "editCampaign", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.debug_server_messages", "activeDebugConsole", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.show_channel_bots", "displayBots", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.show_wrong_engines", "displayBadEngines2", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.show_matchmaker_battles", "showMatchMakerBattles", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.hide_interface", "hideInterface", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.neuter_settings", "doNotSetAnySpringSettings", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.agressively_set_borderless", "agressivelySetBorderlessWindowed", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.use_wrong_engine", "useWrongEngine", false)
+	children[#children + 1], offset = AddCheckboxSetting(offset, "dev_settings.show_old_ai_versions", "showOldAiVersions", false)
 
 	children[#children + 1] = Label:New {
 		x = 20,
@@ -1064,7 +1070,7 @@ local function GetVoidTabControls()
 		font = Configuration:GetFont(2),
 		OnClick = {
 			function (obj)
-				WG.Chobby.ConfirmationPopup(DisableAllWidgets, "This will break everything. Are you sure?", nil, 315, 170, i18n("yes"), i18n("cancel"))
+				WG.Chobby.ConfirmationPopup(DisableAllWidgets, "This will break everything. Are you sure?", nil, 315, 170, WG.Translate("yes"), WG.Translate("cancel"))
 			end
 		}
 	}
@@ -1226,6 +1232,8 @@ local function GetVoidTabControls()
 	offset = offset + ITEM_OFFSET
 
 	freezeSettings = false
+
+	manageControlsStrings(children)
 
 	return children
 end
@@ -1569,7 +1577,59 @@ local function PopulateTab(settingPresets, settingOptions, settingsDefault)
 		children[#children + 1] = list
 	end
 
+	manageControlsStrings(children)
+
 	return children
+end
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- i18n string management
+
+local i18n_controls = {
+}
+
+function manageControlsStrings(controls)
+	for _, control in pairs(controls) do
+		i18n_controls[#i18n_controls + 1] = control
+	end
+end
+
+local function languageChanged()
+	for _, control in pairs(i18n_controls) do
+		if control.captionKey then
+			control.caption = WG.Translate(control.captionKey)
+		end
+		
+		if control.tooltipKey then
+			control.tooltip = WG.Translate(control.tooltipKey)
+		end
+
+		if control.classname == 'combobox' and control.captionKeys then
+			control.captions = control.captions or {}
+			for i, _ in pairs(control.items) do
+				-- ComboBox can use the item strings as identifiers for options
+				-- or as indices when selecting an item, so keep the captions separate
+				-- from the string item representation
+				local caption = WG.Translate(control.captionKeys[i])
+				control.captions[i] = caption
+			end
+			control:UpdateSelectedCaption()
+		end
+
+		if control.classname == 'trackbar' then
+			local tooltip = WG.Translate("current_value_header")
+			control:UpdateValueTooltip(tooltip)
+		end
+	end
+
+	if tabPanel then
+		-- Update captions for DetachableTabPanel which handles the creation of the tab controls
+		for i, tab in pairs(tabPanel.tabs) do
+	                local caption = WG.Translate("settings.tabs." .. tab.name:lower())
+			tabPanel.tabBar:UpdateStrings(i, caption)
+		end
+	end
 end
 
 --------------------------------------------------------------------------------
@@ -1589,8 +1649,8 @@ local function MakeTab(name, children)
 
 	return {
 		name = name,
-		caption = name,
 		font = WG.Chobby.Configuration:GetFont(3),
+		caption = "",
 		children = {contentsPanel}
 	}
 end
@@ -1614,7 +1674,7 @@ local function InitializeControls(window)
 		tabs[#tabs + 1] = MakeTab("Developer", GetVoidTabControls())
 	end
 
-	local tabPanel = Chili.DetachableTabPanel:New {
+	tabPanel = Chili.DetachableTabPanel:New {
 		x = 5,
 		right = 5,
 		y = 45,
@@ -1647,6 +1707,8 @@ local function InitializeControls(window)
 	function externalFunctions.OpenTab(tabName)
 		tabPanel.tabBar:Select(tabName)
 	end
+
+	languageChanged()
 
 	return externalFunctions
 end
@@ -1899,6 +1961,8 @@ function widget:Initialize()
 	end
 	WG.LibLobby.lobby:AddListener("OnBattleAboutToStart", onBattleAboutToStart)
 	WG.LibLobby.localLobby:AddListener("OnBattleAboutToStart", onBattleAboutToStart)
+
+	WG.InitializeTranslation(languageChanged, GetInfo().name)
 
 	WG.SettingsWindow = SettingsWindow
 end

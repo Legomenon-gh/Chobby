@@ -166,3 +166,9 @@ function Trackbar:MouseMove(x, y, dx, dy, button)
 end
 
 --// =============================================================================
+
+function Trackbar:UpdateValueTooltip(valueTooltip)
+	if not self.tooltipFunction and self.useValueTooltip then
+		self.tooltip = valueTooltip .. " " .. FormatNum(self.value, self.tooltip_format)
+	end
+end

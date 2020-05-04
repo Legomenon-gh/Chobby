@@ -55,9 +55,13 @@ function ComboBox:Select(itemIdx)
 		end
 		self.selected = itemIdx
 
-		if type(item) == "string" and not self.ignoreItemCaption then
-			self.caption = ""
-			self.caption = item
+		if type(item) == "string" then
+			if self.captions then
+				self.caption = self.captions[itemIdx]
+			elseif not self.ignoreItemCaption then
+				self.caption = ""
+				self.caption = item
+			end
 		end
 		self:CallListeners(self.OnSelect, itemIdx, true)
 		self:Invalidate()
@@ -111,8 +115,9 @@ function ComboBox:MouseDown(x, y)
 		for i = 1, #self.items do
 			local item = self.items[i]
 			if type(item) == "string" then
+				local caption = self.captions and self.captions[i] or item
 				local newBtn = ComboBoxItem:New {
-					caption = item,
+					caption = caption,
 					width = '100%',
 					height = self.itemHeight,
 					fontsize = self.itemFontSize,
@@ -187,4 +192,11 @@ function ComboBox:MouseUp(...)
 	self:Invalidate()
 	return self
 	-- this exists to override Button:MouseUp so it doesn't modify .state.pressed
+end
+
+function ComboBox:UpdateSelectedCaption()
+	-- i18n support after language change
+	if self.captions and self.selected then
+		self.caption = self.captions[self.selected]
+	end
 end

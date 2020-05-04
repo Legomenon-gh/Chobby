@@ -123,4 +123,11 @@ function TabBar:Remove(tabname, updateSelection)
 
 	return false
 end
+
+function TabBar:UpdateStrings(tabIndex, caption, tooltip)
+	-- Used to support i18n dynamic string updates
+	local tab = self.children[tabIndex]
+	tab.caption = caption
+	tab.tooltip = tooltip
+end
 --// =============================================================================

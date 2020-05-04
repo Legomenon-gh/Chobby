@@ -120,7 +120,7 @@ function widget:Initialize()
 		end
 		if key == "language" then
 			Spring.Echo("Set language to "..value)
-			i18n.setLocale(value)
+			WG.SetLanguage(value)
 		end
 	end
 	Chobby.Configuration:AddListener("OnConfigurationChange", onConfigurationChange)

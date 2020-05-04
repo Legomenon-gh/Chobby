@@ -1,0 +1,20 @@
+{
+  "dev_settings": {
+    "debugMode": "Debug Mode",
+    "debug_auto_win": "Debug Auto Win",
+    "enable_profiler": "Enable Profiler",
+    "show_planet_unlocks": "Show Planet Unlocks",
+    "show_planet_enemy_units": "Show Planet Enemy Units",
+    "campaign_spawn_debug": "Campaign Spawn Debug",
+    "edit_campaign": "Edit Campaign",
+    "debug_server_messages": "Debug Server Messages",
+    "show_channel_bots": "Show channel bots",
+    "show_wrong_engines": "Show wrong engines",
+    "show_matchmaker_battles": "Debug for MatchMaker",
+    "hide_interface": "Hide Interface",
+    "neuter_settings": "Neuter Settings",
+    "agressively_set_borderless": "Aggressive Set Borderless",
+    "use_wrong_engine": "Use wrong engine",
+    "show_old_ai_versions": "Show old AI versions"
+  }
+}
